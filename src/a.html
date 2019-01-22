@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="format-detection" content="telephone=no" />
+  <title>page A</title>
+  <script src="../lib/qrcode.js"></script>
+  <script src="../lib/socket.io.js"></script>
+</head>
+
+<body>
+  <input type="text" id="message">
+  <button id="sendmsg">发送消息</button>
+  <div id="room"></div>
+
+  <script>
+    var messageEl = document.getElementById('message'),
+      sendmsgEl = document.getElementById('sendmsg');
+
+    var socket = null,
+      roomid = null;
+
+    function init() {
+      openWebSocket();
+      initListeners();
+    }
+
+    function openWebSocket() {
+      roomid = uuidv4().toUpperCase();
+      socket = io.connect('http://192.168.118.28:8077/');
+
+      socket.emit('roomid', roomid);
+
+      var location = window.location,
+        uri = location.origin,
+        pathname = location.pathname;
+
+      var pathArr = pathname.split('/');
+
+      pathArr.length = pathArr.length - 1;
+      pathname = pathArr.join('/');
+      uri += pathname + '/b.html?roomid=' + roomid;
+      document.getElementById('room').textContent = uri;
+    }
+
+    function initListeners() {
+      sendmsgEl.addEventListener('click', function () {
+        socket.emit('send_text', messageEl.value);
+      });
+    }
+
+    function uuidv4() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+          v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    init();
+  </script>
+</body>
+
+</html>

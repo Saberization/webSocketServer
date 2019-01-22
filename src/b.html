@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="format-detection" content="telephone=no" />
+  <title>page B</title>
+  <script src="../lib/socket.io.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div id="room"></div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    var socket = null,
+      roomid = null;
+
+    var roomEl = document.getElementById('room'),
+      resultEl = document.getElementById('result');
+
+    function init() {
+      roomid = getExtraDataByKey('roomid');
+      openWebSocket();
+    }
+
+    function openWebSocket() {
+      socket = io.connect('http://192.168.118.28:8077/');
+      socket.emit('roomid', roomid);
+      socket.on('get_text', function(text) {
+        resultEl.textContent = 'a.html 发送过来的数据：' + text;
+      });
+      socket.on('join_room_success', function() {
+        roomEl.textContent = roomid + ' 连接成功';
+      });
+
+      if (!roomid) {
+        roomEl.textContent = roomid + ' 连接失败';
+      }
+    }
+
+    function getExtraDataByKey(key) {
+      const regExp = new RegExp(key + '=([^&]*)');
+      const result = window.location.search.match(regExp);
+
+      if (result && Array.isArray(result)) {
+        return result[1];
+      }
+
+      return '';
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
